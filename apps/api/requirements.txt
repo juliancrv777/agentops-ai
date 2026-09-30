@@ -9,5 +9,8 @@ pydantic-settings==2.15.0
 PyJWT==2.15.1
 argon2-cffi==25.1.0
 email-validator==2.3.0
+openai==3.20.0
+pypdf==6.19.0
+python-multipart==0.0.32
 pytest>=8.4.0,<9.0.0
 httpx>=0.28.0,<0.29.0
