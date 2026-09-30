@@ -2,9 +2,9 @@
 
 ## Goal
 
-AgentOps AI is designed as a multi-tenant AI operations platform where users can retrieve grounded knowledge, run agent workflows, invoke tools, and approve sensitive actions.
+AgentOps AI is a multi-tenant AI operations platform where users can retrieve grounded knowledge, run agent workflows, invoke tools, and approve sensitive actions.
 
-The architecture evolves incrementally. Components are only marked as implemented after code, tests, and runtime verification exist.
+Components are only marked as implemented after code, tests, and runtime verification exist.
 
 ## Implemented
 
@@ -12,37 +12,60 @@ The architecture evolves incrementally. Components are only marked as implemente
 
 - Next.js / React / TypeScript web application
 - FastAPI / Python API
-- API health endpoint
-- Server-side web-to-API health integration
-- Docker Compose development environment
-- Backend API tests
-- Frontend typecheck and production build checks
-- GitHub Actions CI
+- Docker Compose
+- health checks, tests, and GitHub Actions CI
 
 ### Phase 2 — persistence foundation
 
-- PostgreSQL 17 development and CI services
-- pgvector extension enabled through Alembic migration
-- SQLAlchemy 2 persistence models
+- PostgreSQL 17
+- pgvector enabled through Alembic
+- SQLAlchemy 2 models
 - Redis async client
-- Dependency readiness endpoint
-- CI integration tests against real PostgreSQL/pgvector and Redis
-- Foundational tables for organizations, users, memberships, documents, and document chunks
-- vector(1536) storage ready for a later embedding pipeline
+- dependency readiness checks
+- CI integration tests against real services
+
+### Phase 3 — authentication and tenant isolation
+
+- Argon2 password hashes
+- JWT access tokens
+- opaque, hashed refresh sessions
+- HttpOnly refresh cookie
+- refresh rotation and revocation
+- organization owner membership created on signup
+- database-backed membership validation on protected requests
+- explicit cross-tenant access denial
+- integration coverage for authentication and token replay rejection
 
 ## Current data model
 
 ```text
 Organization
   ├── OrganizationMember ── User
+  │                           └── RefreshSession
   └── Document
         └── DocumentChunk
               └── vector(1536)
 ```
 
-The embedding column is infrastructure only at this phase. No RAG claim is made until document ingestion, embeddings generation, retrieval ranking, and citation behavior are implemented.
+## Current request security flow
 
-## Target application architecture
+```text
+Bearer access token
+       |
+       v
+JWT signature + expiry verification
+       |
+       v
+user + organization parsed
+       |
+       v
+membership re-checked in PostgreSQL
+       |
+       v
+current persisted role used for authorization
+```
+
+## Target AI architecture
 
 ```text
 Browser
@@ -55,19 +78,13 @@ Next.js Web
 FastAPI Application
   |
   +--> PostgreSQL + pgvector
-  |
   +--> Redis
-  |
   +--> Background workers
-  |
   +--> LLM gateway
-  |      |
   |      +--> RAG / embeddings
   |      +--> LangGraph agents
   |      +--> tool calling
-  |
   +--> MCP server
-         |
          +--> knowledge tools
          +--> incident tools
          +--> metrics tools
@@ -77,34 +94,24 @@ FastAPI Application
 
 Planned AWS deployment will prefer managed services and least-privilege IAM:
 
-- CloudFront for edge delivery where appropriate
-- ECS/Fargate for containerized application services
-- RDS PostgreSQL with pgvector support
+- CloudFront
+- ECS/Fargate
+- RDS PostgreSQL + pgvector
 - ElastiCache Redis
-- S3 for document storage
-- SQS for asynchronous work
-- Secrets Manager for credentials
-- CloudWatch for logs, metrics, alarms, and dashboards
-- Terraform for infrastructure as code
+- S3
+- SQS
+- Secrets Manager
+- CloudWatch
+- Terraform
 
 Exact services remain subject to implementation and cost review.
 
-## Security principles
-
-1. Multi-tenant data access must be explicitly scoped.
-2. Secrets must never be committed to source control.
-3. Sensitive agent actions require authorization and, where appropriate, human approval.
-4. Tool inputs and LLM outputs are untrusted data.
-5. Retrieval results must preserve source metadata for citations.
-6. Background work must be retry-safe and idempotent.
-7. Authentication, authorization, and audit trails are tested as product behavior.
-
 ## Reliability principles
 
-- Timeouts around external dependencies
-- Structured logs with request correlation
-- Health and readiness checks
-- Retry policies with bounded backoff
-- Idempotency for side-effecting operations
-- Automated unit, integration, and E2E coverage
+- timeouts around external dependencies
+- structured logs with request correlation
+- liveness and dependency readiness checks
+- retry policies with bounded backoff
+- idempotency for side effects
+- automated unit, integration, and E2E coverage
 - CI required before merge
