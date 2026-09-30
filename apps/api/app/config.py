@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     openai_embedding_model: str | None = None
 
+    chat_provider: str = "deterministic"
+    openai_chat_model: str | None = None
+    chat_history_messages: int = 12
+    chat_retrieval_top_k: int = 5
+
     upload_dir: str = "data/uploads"
     max_upload_bytes: int = 5_000_000
     chunk_size_words: int = 220
