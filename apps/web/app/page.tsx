@@ -47,8 +47,8 @@ export default async function Home() {
       <section className="status-grid" aria-label="Platform status">
         <article className="card accent">
           <span className="label">Phase</span>
-          <strong>01 / Bootstrap</strong>
-          <p>Web, API, Docker, tests, and CI foundation.</p>
+          <strong>02 / Persistence</strong>
+          <p>PostgreSQL, pgvector, Redis, migrations, readiness, and CI.</p>
         </article>
 
         <article className="card">
