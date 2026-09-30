@@ -3,11 +3,11 @@ import { getApiHealth } from "@/lib/api";
 export const dynamic = "force-dynamic";
 
 const capabilities = [
+  "Tenant-aware authentication",
   "RAG with grounded citations",
   "Agent orchestration",
   "MCP tools",
   "Human approvals",
-  "Audit-ready workflows",
   "AWS infrastructure",
 ];
 
@@ -47,8 +47,8 @@ export default async function Home() {
       <section className="status-grid" aria-label="Platform status">
         <article className="card accent">
           <span className="label">Phase</span>
-          <strong>02 / Persistence</strong>
-          <p>PostgreSQL, pgvector, Redis, migrations, readiness, and CI.</p>
+          <strong>03 / Identity</strong>
+          <p>Argon2, JWT, refresh rotation, RBAC, and tenant isolation.</p>
         </article>
 
         <article className="card">
@@ -72,7 +72,7 @@ export default async function Home() {
 
       <section id="architecture" className="section">
         <div>
-          <span className="label">Target capabilities</span>
+          <span className="label">Capabilities</span>
           <h2>Built to cover the full AI application lifecycle.</h2>
         </div>
 

@@ -2,7 +2,7 @@
 
 AI-native operations platform for knowledge retrieval, incident analysis, and tool-driven workflows.
 
-> **Status:** Phase 2 — persistence foundation verified in CI. The repository contains a working Next.js frontend, FastAPI backend, PostgreSQL + pgvector schema, Redis connectivity, Alembic migrations, Docker development environment, automated tests, and CI.
+> **Status:** Phase 3 — authentication and multi-tenancy verified in CI.
 
 ## Why this project exists
 
@@ -12,6 +12,7 @@ AgentOps AI is a portfolio-grade engineering project designed to demonstrate pro
 - Python + FastAPI backend
 - PostgreSQL + pgvector for relational and vector data
 - Redis for caching and asynchronous workflows
+- secure authentication, tenant isolation, and RBAC
 - Streaming AI UX
 - Retrieval-Augmented Generation (RAG)
 - Tool/function calling and agent orchestration
@@ -20,7 +21,7 @@ AgentOps AI is a portfolio-grade engineering project designed to demonstrate pro
 - AWS infrastructure managed with Terraform
 - Docker, CI/CD, automated testing, observability, and security practices
 
-## Current architecture
+## Implemented architecture
 
 ```text
 ┌──────────────────────────┐
@@ -30,73 +31,60 @@ AgentOps AI is a portfolio-grade engineering project designed to demonstrate pro
               │ REST
 ┌─────────────▼────────────┐
 │ FastAPI / Python         │
-│ Application API          │
+│ Auth + tenant-aware API  │
 └───────┬─────────┬────────┘
         │         │
   PostgreSQL    Redis
   + pgvector    readiness
 ```
 
-The current database schema establishes organizations, users, organization memberships, documents, and document chunks with a pgvector embedding column. RAG behavior itself is not marked complete until ingestion and retrieval are implemented.
+### Authentication
 
-## Repository structure
+- Argon2 password hashing
+- short-lived JWT access tokens
+- opaque refresh tokens stored only as SHA-256 hashes
+- HttpOnly refresh cookie
+- refresh-token rotation and revocation
+- replay rejection for rotated/revoked refresh sessions
+- request-time membership verification
+- organization-level tenant isolation
+- role carried from the persisted membership, not blindly trusted from JWT claims
 
-```text
-apps/
-  api/        FastAPI service, persistence layer, migrations, tests
-  web/        Next.js application
-docs/
-  architecture.md
-.github/
-  workflows/ci.yml
-docker-compose.yml
-```
+See [docs/security.md](docs/security.md).
+
+## Data foundation
+
+The current schema includes:
+
+- organizations
+- users
+- organization memberships
+- refresh sessions
+- documents
+- document chunks with `vector(1536)`
+
+The vector column is infrastructure only at this stage. RAG is not marked complete until ingestion, embedding generation, retrieval, and citations are verified.
 
 ## Run locally
-
-### Docker
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-The API container automatically runs `alembic upgrade head` before startup.
+The API container runs all Alembic migrations before startup.
 
-Then open:
+Open:
 
 - Web: http://localhost:3000
 - API: http://localhost:8000
 - API docs: http://localhost:8000/docs
 - Liveness: http://localhost:8000/health
-- Dependency readiness: http://localhost:8000/ready
-
-### Without Docker
-
-Backend:
-
-```bash
-cd apps/api
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-alembic upgrade head
-uvicorn app.main:app --reload
-```
-
-Frontend:
-
-```bash
-cd apps/web
-npm install
-npm run dev
-```
+- Readiness: http://localhost:8000/ready
 
 ## Verification
 
-The backend CI job starts real PostgreSQL/pgvector and Redis containers, applies the Alembic migration, then verifies the API and dependency readiness.
-
-Backend:
+The API CI job starts real PostgreSQL/pgvector and Redis containers, applies every migration, and runs unit/integration tests.
 
 ```bash
 cd apps/api
@@ -116,7 +104,7 @@ npm run build
 
 - [x] Phase 1 — monorepo bootstrap, web/API health integration, Docker, tests, CI
 - [x] Phase 2 — PostgreSQL, pgvector, Redis, migrations, persistence layer
-- [ ] Phase 3 — authentication, organizations, RBAC, multi-tenancy
+- [x] Phase 3 — authentication, organizations, RBAC, multi-tenancy
 - [ ] Phase 4 — document ingestion, chunking, embeddings, vector retrieval
 - [ ] Phase 5 — streamed AI chat with citations and conversation memory
 - [ ] Phase 6 — LangGraph agents, tool calling, guardrails

@@ -1,3 +1,5 @@
+from collections.abc import AsyncIterator
+
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -24,6 +26,11 @@ SessionLocal = async_sessionmaker(
 
 class Base(DeclarativeBase):
     pass
+
+
+async def get_session() -> AsyncIterator[AsyncSession]:
+    async with SessionLocal() as session:
+        yield session
 
 
 async def check_database() -> bool:

@@ -7,6 +7,8 @@ from fastapi.responses import JSONResponse
 
 from app.cache import check_redis, close_redis
 from app.db import check_database, close_database
+from app.routers.auth import router as auth_router
+from app.routers.organizations import router as organizations_router
 
 
 @asynccontextmanager
@@ -18,7 +20,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="AgentOps AI API",
-    version="0.2.0",
+    version="0.3.0",
     description="Backend API for the AgentOps AI platform.",
     lifespan=lifespan,
 )
@@ -30,6 +32,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
+app.include_router(organizations_router)
 
 
 @app.get("/")
@@ -46,7 +51,7 @@ def health() -> dict[str, str]:
     return {
         "status": "ok",
         "service": "api",
-        "version": "0.2.0",
+        "version": "0.3.0",
     }
 
 

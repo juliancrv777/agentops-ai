@@ -9,6 +9,10 @@ class Settings(BaseSettings):
         "postgresql+psycopg://agentops:agentops@localhost:5432/agentops"
     )
     redis_url: str = "redis://localhost:6379/0"
+    auth_secret: str = "dev-only-change-me-agentops-secret-32chars"
+    access_token_minutes: int = 15
+    refresh_token_days: int = 14
+    refresh_cookie_name: str = "agentops_refresh"
 
     model_config = SettingsConfigDict(
         env_file=".env",
