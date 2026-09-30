@@ -218,10 +218,7 @@ async def stream_message(
 
     citations = [_citation_payload(chunk) for chunk in retrieved]
     organization_id = principal.organization_id
-    user_id = principal.user_id
-
     async def event_stream() -> AsyncIterator[str]:
-        del user_id
         yield _sse(
             "sources",
             {
