@@ -2,7 +2,16 @@ import uuid
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -112,6 +121,13 @@ class RefreshSession(Base):
 
 class Document(Base):
     __tablename__ = "documents"
+    __table_args__ = (
+        UniqueConstraint(
+            "organization_id",
+            "content_sha256",
+            name="uq_documents_org_sha256",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -126,6 +142,9 @@ class Document(Base):
     )
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
     object_key: Mapped[str | None] = mapped_column(String(512))
+    mime_type: Mapped[str | None] = mapped_column(String(128))
+    size_bytes: Mapped[int | None] = mapped_column(BigInteger)
+    content_sha256: Mapped[str | None] = mapped_column(String(64))
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -136,6 +155,13 @@ class Document(Base):
 
 class DocumentChunk(Base):
     __tablename__ = "document_chunks"
+    __table_args__ = (
+        UniqueConstraint(
+            "document_id",
+            "chunk_index",
+            name="uq_document_chunk_index",
+        ),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
