@@ -4,20 +4,43 @@
 
 AgentOps AI is designed as a multi-tenant AI operations platform where users can retrieve grounded knowledge, run agent workflows, invoke tools, and approve sensitive actions.
 
-The architecture will evolve incrementally. Components are only marked as implemented after code, tests, and runtime verification exist.
+The architecture evolves incrementally. Components are only marked as implemented after code, tests, and runtime verification exist.
 
-## Phase 1 — implemented
+## Implemented
+
+### Phase 1 — platform bootstrap
 
 - Next.js / React / TypeScript web application
 - FastAPI / Python API
 - API health endpoint
 - Server-side web-to-API health integration
-- PostgreSQL + pgvector development container
-- Redis development container
 - Docker Compose development environment
-- Backend unit/API tests
+- Backend API tests
 - Frontend typecheck and production build checks
 - GitHub Actions CI
+
+### Phase 2 — persistence foundation
+
+- PostgreSQL 17 development and CI services
+- pgvector extension enabled through Alembic migration
+- SQLAlchemy 2 persistence models
+- Redis async client
+- Dependency readiness endpoint
+- CI integration tests against real PostgreSQL/pgvector and Redis
+- Foundational tables for organizations, users, memberships, documents, and document chunks
+- vector(1536) storage ready for a later embedding pipeline
+
+## Current data model
+
+```text
+Organization
+  ├── OrganizationMember ── User
+  └── Document
+        └── DocumentChunk
+              └── vector(1536)
+```
+
+The embedding column is infrastructure only at this phase. No RAG claim is made until document ingestion, embeddings generation, retrieval ranking, and citation behavior are implemented.
 
 ## Target application architecture
 
@@ -80,7 +103,7 @@ Exact services remain subject to implementation and cost review.
 
 - Timeouts around external dependencies
 - Structured logs with request correlation
-- Health/readiness checks
+- Health and readiness checks
 - Retry policies with bounded backoff
 - Idempotency for side-effecting operations
 - Automated unit, integration, and E2E coverage
