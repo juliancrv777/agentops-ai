@@ -40,6 +40,7 @@ jobs:
       REDIS_URL: redis://localhost:6379/0
       AUTH_SECRET: ci-only-agentops-secret-that-is-long-enough
       EMBEDDING_PROVIDER: deterministic
+      CHAT_PROVIDER: deterministic
       RUN_INTEGRATION_TESTS: "1"
     defaults:
       run:

@@ -36,6 +36,8 @@ services:
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-deterministic}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-}
+      CHAT_PROVIDER: ${CHAT_PROVIDER:-deterministic}
+      OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL:-}
     ports:
       - "8000:8000"
     volumes:

@@ -63,3 +63,26 @@ class RetrievalResult(BaseModel):
 class RetrievalResponse(BaseModel):
     query: str
     results: list[RetrievalResult]
+
+
+class ConversationCreateRequest(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+
+
+class ConversationResponse(BaseModel):
+    id: UUID
+    title: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class ChatMessageRequest(BaseModel):
+    content: str = Field(min_length=1, max_length=8000)
+
+
+class ChatMessageResponse(BaseModel):
+    id: UUID
+    role: str
+    content: str
+    citations: list[dict]
+    created_at: datetime
