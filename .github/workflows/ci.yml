@@ -12,6 +12,33 @@ jobs:
   api:
     name: API tests
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: agentops
+          POSTGRES_USER: agentops
+          POSTGRES_PASSWORD: agentops
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agentops -d agentops"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://agentops:agentops@localhost:5432/agentops
+      REDIS_URL: redis://localhost:6379/0
+      RUN_INTEGRATION_TESTS: "1"
     defaults:
       run:
         working-directory: apps/api
@@ -23,6 +50,7 @@ jobs:
           cache: pip
           cache-dependency-path: apps/api/requirements.txt
       - run: pip install -r requirements.txt
+      - run: alembic upgrade head
       - run: pytest -q
 
   web:

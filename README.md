@@ -2,7 +2,7 @@
 
 AI-native operations platform for knowledge retrieval, incident analysis, and tool-driven workflows.
 
-> **Status:** Phase 1 — platform bootstrap. The repository currently contains a working Next.js frontend, FastAPI backend, Docker development environment, automated tests, and CI. AI/RAG/agent features are intentionally tracked as upcoming phases until they are implemented and verified.
+> **Status:** Phase 2 — persistence foundation verified in CI. The repository contains a working Next.js frontend, FastAPI backend, PostgreSQL + pgvector schema, Redis connectivity, Alembic migrations, Docker development environment, automated tests, and CI.
 
 ## Why this project exists
 
@@ -34,14 +34,16 @@ AgentOps AI is a portfolio-grade engineering project designed to demonstrate pro
 └───────┬─────────┬────────┘
         │         │
   PostgreSQL    Redis
-  + pgvector   (planned wiring)
+  + pgvector    readiness
 ```
+
+The current database schema establishes organizations, users, organization memberships, documents, and document chunks with a pgvector embedding column. RAG behavior itself is not marked complete until ingestion and retrieval are implemented.
 
 ## Repository structure
 
 ```text
 apps/
-  api/        FastAPI service and tests
+  api/        FastAPI service, persistence layer, migrations, tests
   web/        Next.js application
 docs/
   architecture.md
@@ -59,12 +61,15 @@ cp .env.example .env
 docker compose up --build
 ```
 
+The API container automatically runs `alembic upgrade head` before startup.
+
 Then open:
 
 - Web: http://localhost:3000
 - API: http://localhost:8000
 - API docs: http://localhost:8000/docs
-- Health: http://localhost:8000/health
+- Liveness: http://localhost:8000/health
+- Dependency readiness: http://localhost:8000/ready
 
 ### Without Docker
 
@@ -75,6 +80,7 @@ cd apps/api
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
@@ -87,6 +93,8 @@ npm run dev
 ```
 
 ## Verification
+
+The backend CI job starts real PostgreSQL/pgvector and Redis containers, applies the Alembic migration, then verifies the API and dependency readiness.
 
 Backend:
 
@@ -104,12 +112,10 @@ npm run typecheck
 npm run build
 ```
 
-GitHub Actions runs these checks for pushes and pull requests.
-
 ## Roadmap
 
 - [x] Phase 1 — monorepo bootstrap, web/API health integration, Docker, tests, CI
-- [ ] Phase 2 — PostgreSQL, pgvector, Redis, migrations, persistence layer
+- [x] Phase 2 — PostgreSQL, pgvector, Redis, migrations, persistence layer
 - [ ] Phase 3 — authentication, organizations, RBAC, multi-tenancy
 - [ ] Phase 4 — document ingestion, chunking, embeddings, vector retrieval
 - [ ] Phase 5 — streamed AI chat with citations and conversation memory
