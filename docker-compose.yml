@@ -32,10 +32,15 @@ services:
       APP_ENV: ${APP_ENV:-development}
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://agentops:agentops@postgres:5432/agentops}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      AUTH_SECRET: ${AUTH_SECRET:-dev-only-change-me-agentops-secret-32chars}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-deterministic}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-}
     ports:
       - "8000:8000"
     volumes:
       - ./apps/api:/app
+      - upload_data:/app/data/uploads
     command: >
       sh -c "alembic upgrade head &&
       uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
@@ -63,3 +68,4 @@ services:
 
 volumes:
   postgres_data:
+  upload_data:
