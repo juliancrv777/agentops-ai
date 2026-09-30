@@ -4,11 +4,11 @@ export const dynamic = "force-dynamic";
 
 const capabilities = [
   "Tenant-aware authentication",
-  "RAG with grounded citations",
+  "Document ingestion + pgvector",
+  "Grounded AI chat",
   "Agent orchestration",
   "MCP tools",
   "Human approvals",
-  "AWS infrastructure",
 ];
 
 export default async function Home() {
@@ -47,8 +47,8 @@ export default async function Home() {
       <section className="status-grid" aria-label="Platform status">
         <article className="card accent">
           <span className="label">Phase</span>
-          <strong>03 / Identity</strong>
-          <p>Argon2, JWT, refresh rotation, RBAC, and tenant isolation.</p>
+          <strong>04 / Retrieval</strong>
+          <p>Document ingestion, pgvector, HNSW, and tenant-safe search.</p>
         </article>
 
         <article className="card">

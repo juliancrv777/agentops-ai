@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
@@ -34,3 +35,31 @@ class OrganizationResponse(BaseModel):
     name: str
     slug: str
     role: str
+
+
+class DocumentResponse(BaseModel):
+    id: UUID
+    filename: str
+    mime_type: str | None
+    size_bytes: int | None
+    status: str
+    created_at: datetime
+
+
+class RetrievalRequest(BaseModel):
+    query: str = Field(min_length=2, max_length=2000)
+    top_k: int = Field(default=5, ge=1, le=10)
+
+
+class RetrievalResult(BaseModel):
+    document_id: UUID
+    chunk_id: UUID
+    filename: str
+    content: str
+    score: float
+    metadata: dict
+
+
+class RetrievalResponse(BaseModel):
+    query: str
+    results: list[RetrievalResult]

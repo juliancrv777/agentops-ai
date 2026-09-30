@@ -14,6 +14,16 @@ class Settings(BaseSettings):
     refresh_token_days: int = 14
     refresh_cookie_name: str = "agentops_refresh"
 
+    embedding_provider: str = "deterministic"
+    embedding_dimensions: int = 1536
+    openai_api_key: str | None = None
+    openai_embedding_model: str | None = None
+
+    upload_dir: str = "data/uploads"
+    max_upload_bytes: int = 5_000_000
+    chunk_size_words: int = 220
+    chunk_overlap_words: int = 40
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -39,6 +39,7 @@ jobs:
       DATABASE_URL: postgresql+psycopg://agentops:agentops@localhost:5432/agentops
       REDIS_URL: redis://localhost:6379/0
       AUTH_SECRET: ci-only-agentops-secret-that-is-long-enough
+      EMBEDDING_PROVIDER: deterministic
       RUN_INTEGRATION_TESTS: "1"
     defaults:
       run:
