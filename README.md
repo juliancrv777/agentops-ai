@@ -2,7 +2,7 @@
 
 AI-native operations platform for knowledge retrieval, incident analysis, and tool-driven workflows.
 
-> **Status:** Phase 3 — authentication and multi-tenancy verified in CI.
+> **Status:** Phase 4 — document ingestion and vector retrieval verified in CI.
 
 ## Why this project exists
 
@@ -10,23 +10,24 @@ AgentOps AI is a portfolio-grade engineering project designed to demonstrate pro
 
 - Next.js + React + TypeScript frontend
 - Python + FastAPI backend
-- PostgreSQL + pgvector for relational and vector data
-- Redis for caching and asynchronous workflows
-- secure authentication, tenant isolation, and RBAC
-- Streaming AI UX
-- Retrieval-Augmented Generation (RAG)
-- Tool/function calling and agent orchestration
+- PostgreSQL + pgvector
+- Redis
+- secure authentication, RBAC, and tenant isolation
+- document ingestion for TXT, Markdown, and PDF
+- chunking, embeddings, and vector retrieval
+- streaming AI UX
+- Retrieval-Augmented Generation (RAG) with grounded citations
+- tool/function calling and agent orchestration
 - Model Context Protocol (MCP)
-- Human-in-the-loop approvals and guardrails
+- human-in-the-loop approvals and guardrails
 - AWS infrastructure managed with Terraform
 - Docker, CI/CD, automated testing, observability, and security practices
 
-## Implemented architecture
+## Verified architecture
 
 ```text
 ┌──────────────────────────┐
 │ Next.js / React / TS     │
-│ Web application          │
 └─────────────┬────────────┘
               │ REST
 ┌─────────────▼────────────┐
@@ -35,35 +36,53 @@ AgentOps AI is a portfolio-grade engineering project designed to demonstrate pro
 └───────┬─────────┬────────┘
         │         │
   PostgreSQL    Redis
-  + pgvector    readiness
+  + pgvector
+        │
+        ├── documents
+        └── document_chunks
+              └── vector(1536)
 ```
 
-### Authentication
+## Authentication and tenancy
 
 - Argon2 password hashing
 - short-lived JWT access tokens
 - opaque refresh tokens stored only as SHA-256 hashes
 - HttpOnly refresh cookie
-- refresh-token rotation and revocation
-- replay rejection for rotated/revoked refresh sessions
-- request-time membership verification
-- organization-level tenant isolation
-- role carried from the persisted membership, not blindly trusted from JWT claims
+- refresh-token rotation, revocation, and replay rejection
+- database-backed organization membership checks
+- explicit cross-tenant access denial
 
 See [docs/security.md](docs/security.md).
 
-## Data foundation
+## Retrieval pipeline
 
-The current schema includes:
+The verified Phase 4 flow is:
 
-- organizations
-- users
-- organization memberships
-- refresh sessions
-- documents
-- document chunks with `vector(1536)`
+```text
+Upload
+  ↓
+TXT / Markdown / PDF extraction
+  ↓
+overlapping word chunks
+  ↓
+embedding provider
+  ↓
+pgvector vector(1536)
+  ↓
+HNSW cosine index
+  ↓
+tenant-scoped similarity search
+```
 
-The vector column is infrastructure only at this stage. RAG is not marked complete until ingestion, embedding generation, retrieval, and citations are verified.
+The repository includes two embedding implementations:
+
+1. **Deterministic feature-hash provider** — used by CI so ingestion and retrieval are fully testable without paid external services.
+2. **OpenAI embedding provider** — production-capable provider selected through environment configuration.
+
+The deterministic provider is deliberately not presented as a semantic AI model. It exists to verify the architecture, persistence, vector queries, tenant boundaries, and failure behavior without requiring a secret in CI.
+
+See [docs/rag.md](docs/rag.md).
 
 ## Run locally
 
@@ -72,7 +91,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-The API container runs all Alembic migrations before startup.
+The API container applies all Alembic migrations before startup.
 
 Open:
 
@@ -84,7 +103,15 @@ Open:
 
 ## Verification
 
-The API CI job starts real PostgreSQL/pgvector and Redis containers, applies every migration, and runs unit/integration tests.
+The backend CI job starts real PostgreSQL/pgvector and Redis services, applies migrations, and tests:
+
+- authentication and refresh rotation;
+- tenant boundaries;
+- document ingestion;
+- duplicate-content rejection;
+- pgvector persistence;
+- vector retrieval;
+- cross-tenant retrieval isolation.
 
 ```bash
 cd apps/api
@@ -105,7 +132,7 @@ npm run build
 - [x] Phase 1 — monorepo bootstrap, web/API health integration, Docker, tests, CI
 - [x] Phase 2 — PostgreSQL, pgvector, Redis, migrations, persistence layer
 - [x] Phase 3 — authentication, organizations, RBAC, multi-tenancy
-- [ ] Phase 4 — document ingestion, chunking, embeddings, vector retrieval
+- [x] Phase 4 — document ingestion, chunking, embeddings, vector retrieval
 - [ ] Phase 5 — streamed AI chat with citations and conversation memory
 - [ ] Phase 6 — LangGraph agents, tool calling, guardrails
 - [ ] Phase 7 — custom MCP server and human approval workflows
@@ -117,7 +144,8 @@ npm run build
 
 - No feature is documented as complete before it is implemented and verified.
 - AI-generated code is reviewed, tested, and treated as untrusted until proven correct.
-- Security, data isolation, and auditability are first-class requirements.
+- Security, tenant isolation, and auditability are first-class requirements.
+- External AI providers are abstracted behind interfaces so tests do not depend on paid services.
 - CI must remain green as the architecture evolves.
 
 ## License
