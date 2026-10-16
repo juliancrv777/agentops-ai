@@ -167,7 +167,7 @@ async def get_conversation(
             ChatMessage.conversation_id == item.id,
             ChatMessage.organization_id == principal.organization_id,
         )
-        .order_by(ChatMessage.created_at.desc(), ChatMessage.id.desc())
+        .order_by(ChatMessage.created_at.desc(), ChatMessage.role.asc(), ChatMessage.id.desc())
         .limit(100)
     )).all()
     return ConversationDetail(
@@ -206,7 +206,7 @@ async def send_message(
             ChatMessage.conversation_id == item.id,
             ChatMessage.organization_id == principal.organization_id,
         )
-        .order_by(ChatMessage.created_at.desc(), ChatMessage.id.desc())
+        .order_by(ChatMessage.created_at.desc(), ChatMessage.role.asc(), ChatMessage.id.desc())
         .limit(8)
     )).all()
     results = await retrieve_knowledge(
