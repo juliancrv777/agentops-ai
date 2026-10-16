@@ -2,7 +2,7 @@
 
 AI-native operations platform for knowledge retrieval, incident analysis, and tool-driven workflows.
 
-> **Status:** Phase 4 — document ingestion and vector retrieval verified in CI.
+> **Status:** Phase 5 (in progress) — persistent knowledge chat and private workspace added; streaming remains on the roadmap.
 
 ## Why this project exists
 
@@ -82,7 +82,7 @@ The repository includes two embedding implementations:
 
 The deterministic provider is deliberately not presented as a semantic AI model. It exists to verify the architecture, persistence, vector queries, tenant boundaries, and failure behavior without requiring a secret in CI.
 
-See [docs/rag.md](docs/rag.md).
+See [docs/rag.md](docs/rag.md) and [docs/chat.md](docs/chat.md).
 
 ## Run locally
 
@@ -96,6 +96,7 @@ The API container applies all Alembic migrations before startup.
 Open:
 
 - Web: http://localhost:3000
+- Knowledge workspace: http://localhost:3000/workspace
 - API: http://localhost:8000
 - API docs: http://localhost:8000/docs
 - Liveness: http://localhost:8000/health
@@ -133,7 +134,7 @@ npm run build
 - [x] Phase 2 — PostgreSQL, pgvector, Redis, migrations, persistence layer
 - [x] Phase 3 — authentication, organizations, RBAC, multi-tenancy
 - [x] Phase 4 — document ingestion, chunking, embeddings, vector retrieval
-- [ ] Phase 5 — streamed AI chat with citations and conversation memory
+- [ ] Phase 5 — grounded chat with citations and persistent conversation memory (implemented); token streaming pending
 - [ ] Phase 6 — LangGraph agents, tool calling, guardrails
 - [ ] Phase 7 — custom MCP server and human approval workflows
 - [ ] Phase 8 — background workers, queues, retries, idempotency
