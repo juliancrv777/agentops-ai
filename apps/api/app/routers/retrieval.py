@@ -17,9 +17,21 @@ async def search_knowledge(
     principal: Principal = Depends(get_current_principal),
     session: AsyncSession = Depends(get_session),
 ) -> RetrievalResponse:
+    results = await retrieve_knowledge(
+        query=payload.query,
+        top_k=payload.top_k,
+        organization_id=principal.organization_id,
+        session=session,
+    )
+    return RetrievalResponse(query=payload.query, results=results)
+
+
+async def retrieve_knowledge(
+    *, query: str, top_k: int, organization_id, session: AsyncSession
+) -> list[RetrievalResult]:
     try:
         provider = get_embedding_provider()
-        vectors = await provider.embed_documents([payload.query])
+        vectors = await provider.embed_documents([query])
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -35,12 +47,12 @@ async def search_knowledge(
         select(DocumentChunk, Document.filename, distance)
         .join(Document, Document.id == DocumentChunk.document_id)
         .where(
-            DocumentChunk.organization_id == principal.organization_id,
+            DocumentChunk.organization_id == organization_id,
             DocumentChunk.embedding.is_not(None),
             Document.status == "ready",
         )
         .order_by(distance)
-        .limit(payload.top_k)
+        .limit(top_k)
     )
 
     rows = (await session.execute(statement)).all()
@@ -61,4 +73,4 @@ async def search_knowledge(
             )
         )
 
-    return RetrievalResponse(query=payload.query, results=results)
+    return results

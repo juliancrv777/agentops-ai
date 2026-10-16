@@ -63,3 +63,44 @@ class RetrievalResult(BaseModel):
 class RetrievalResponse(BaseModel):
     query: str
     results: list[RetrievalResult]
+
+
+class ConversationCreate(BaseModel):
+    title: str = Field(default="New conversation", min_length=1, max_length=120)
+
+
+class ConversationResponse(BaseModel):
+    id: UUID
+    title: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class ChatCitation(BaseModel):
+    document_id: UUID
+    chunk_id: UUID
+    filename: str
+    score: float
+    excerpt: str
+
+
+class MessageCreate(BaseModel):
+    content: str = Field(min_length=2, max_length=2000)
+
+
+class ChatMessageResponse(BaseModel):
+    id: UUID
+    role: str
+    content: str
+    citations: list[ChatCitation]
+    created_at: datetime
+
+
+class ConversationDetail(ConversationResponse):
+    messages: list[ChatMessageResponse]
+
+
+class ChatTurnResponse(BaseModel):
+    user_message: ChatMessageResponse
+    assistant_message: ChatMessageResponse
+    mode: str

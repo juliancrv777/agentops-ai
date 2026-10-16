@@ -20,5 +20,5 @@ def test_health() -> None:
     assert response.json() == {
         "status": "ok",
         "service": "api",
-        "version": "0.4.0",
+        "version": "0.5.0",
     }

@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     embedding_dimensions: int = 1536
     openai_api_key: str | None = None
     openai_embedding_model: str | None = None
+    openai_chat_model: str | None = None
 
     upload_dir: str = "data/uploads"
     max_upload_bytes: int = 5_000_000
