@@ -30,8 +30,8 @@ export default async function Home() {
         </p>
 
         <div className="actions">
-          <a className="primary" href="#architecture">
-            Explore architecture
+          <a className="primary" href="/workspace">
+            Open knowledge workspace
           </a>
           <a
             className="secondary"
@@ -47,8 +47,8 @@ export default async function Home() {
       <section className="status-grid" aria-label="Platform status">
         <article className="card accent">
           <span className="label">Phase</span>
-          <strong>04 / Retrieval</strong>
-          <p>Document ingestion, pgvector, HNSW, and tenant-safe search.</p>
+          <strong>05 / Knowledge Chat</strong>
+          <p>Private conversations, document evidence, citations, and persistent history.</p>
         </article>
 
         <article className="card">
